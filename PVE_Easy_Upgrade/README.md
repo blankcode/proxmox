@@ -2,7 +2,7 @@
 
 One-Liner; Start and Wander Off; Proxmox Virtual Environment Easy Upgrade Script.
 
-- This was tested on five (5) PVE 5.1 deployments with ZERO (0) unexpected issues. If you are using the "free" version there will always be an error during the "apt update".
+- This was tested on five (5) PVE 5.0 deployments with ZERO (0) unexpected issues. <br>If you are using the "free" version there will always be an error during the "apt update". See Below.
 
       root@pve-alpha:~# apt update<br>
       Hit:1 http://ftp.us.debian.org/debian buster InRelease<br>
@@ -19,3 +19,19 @@ One-Liner; Start and Wander Off; Proxmox Virtual Environment Easy Upgrade Script
       E: The repository 'https://enterprise.proxmox.com/debian/pve buster InRelease' is not signed.<br>
       N: Updating from such a repository can't be done securely, and is therefore disabled by default.<br>
       N: See apt-secure(8) manpage for repository creation and user configuration details.<br>
+
+---
+
+## Usage:
+
+      PVE_Easy_Upgrade.sh -h \# Print this message.
+      PVE_Easy_Upgrade.sh    \# Will __ASK__ to reboot at the end.
+      PVE_Easy_Upgrade.sh -r \# Will _FORCE_  a reboot at the end.
+
+## Actions:
+
+      Add the "PVE pve-no-subscription repository provided by proxmox.com" to the "/etc/apt/sources.list" file.
+      If successful:
+        apt update; apt dist-upgrade -y; # Get New Distribution Update
+        apt update; apt upgrade -y;      # Get any updates after the distro.
+        Determine if a reboot is wanted at this time or not.
