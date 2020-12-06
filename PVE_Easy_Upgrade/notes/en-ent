@@ -1,0 +1,13 @@
+# Enable Enterprise
+enable_ent() { 
+  [[ $(grep "pve-enterprise" "$ENTERPRISE_POINTER" | grep -Po "^#deb" | cut -c2-4) != "deb" ]] && { 
+    echo "\"pve-enterprise\" Is already ENABLED." 
+    } || { 
+      echo "ENABLING pve-enterprise.";
+      cp  $ENTERPRISE_POINTER $ENTERPRISE_POINTER_OLD; 
+      LINE_NUMBER=$(grep -n "pve-no-subscription" $ENTERPRISE_POINTER | grep deb | cut -d: -f1); 
+      sed -i -e "$(echo $LINE_NUMBER)s/^#deb/deb/" $ENTERPRISE_POINTER; 
+      echo -ne "\n\nChanges:\n"; 
+      diff $ENTERPRISE_POINTER_OLD $ENTERPRISE_POINTER; 
+      }; 
+  }; 

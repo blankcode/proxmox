@@ -1,0 +1,13 @@
+# Disable Community
+disable_comm() { 
+  [[ $(grep "pve-no-subscription" "$SOURCE_LIST_POINTER" | grep -Po "^#deb" | cut -c2-4) == "deb" ]] && {
+    echo "\"Community Repository\" Is already DISABLED." 
+    } || { 
+      echo "DISABLING \"Community Repository\" (pve-no-subscription).";
+      cp  $SOURCE_LIST_POINTER $SOURCE_LIST_POINTER_OLD; 
+      LINE_NUMBER=$(grep -n "pve-no-subscription" $SOURCE_LIST_POINTER | grep deb | cut -d: -f1); 
+      sed -i -e "$(echo $LINE_NUMBER)s/^deb/#deb/" $SOURCE_LIST_POINTER; 
+      echo -ne "\n\nChanges:\n"; 
+      diff $SOURCE_LIST_POINTER_OLD $SOURCE_LIST_POINTER; 
+      }; 
+  }; 

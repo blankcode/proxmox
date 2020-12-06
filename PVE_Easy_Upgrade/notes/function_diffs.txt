@@ -1,0 +1,62 @@
+Starting to work toward condensing the current code to negate the appearance of "copy-paste".
+
+$ diff -y -W 100 en-*
+# Enable Community                            | # Enable Enterprise
+enable_comm() {                               | enable_ent() {
+  [[ $(grep "pve-no-subscription" "$SOUR      |   [[ $(grep "pve-enterprise" "$ENTERPRISE_POI
+    echo "\"Community Repository\" Is al      |     echo "\"pve-enterprise\" Is already ENABL
+    } || {                                          } || {
+      echo "ENABLING \"Community Reposit      |       echo "ENABLING pve-enterprise.";
+      cp  $SOURCE_LIST_POINTER $SOURCE_L      |       cp  $ENTERPRISE_POINTER $ENTERPRISE_POI
+      LINE_NUMBER=$(grep -n "pve-no-subs      |       LINE_NUMBER=$(grep -n "pve-no-subscript
+      sed -i -e "$(echo $LINE_NUMBER)s/^      |       sed -i -e "$(echo $LINE_NUMBER)s/^#deb/
+      echo -ne "\n\nChanges:\n";                      echo -ne "\n\nChanges:\n";
+      diff $SOURCE_LIST_POINTER_OLD $SOU      |       diff $ENTERPRISE_POINTER_OLD $ENTERPRIS
+      };                                              };
+  };                                              };
+
+$ diff -y -W 100 dis-*
+# Disable Community                           | # Disable Enterprise
+disable_comm() {                              | disable_ent() {
+  [[ $(grep "pve-no-subscription" "$SOUR      |   [[ $(grep "pve-enterprise" "$ENTERPRISE_POI
+    echo "\"Community Repository\" Is al      |     echo "\"pve-enterprise\" Is already DISAB
+    } || {                                          } || {
+      echo "DISABLING \"Community Reposi      |       echo "DISABLING pve-enterprise.";
+      cp  $SOURCE_LIST_POINTER $SOURCE_L      |       cp  $ENTERPRISE_POINTER $ENTERPRISE_POI
+      LINE_NUMBER=$(grep -n "pve-no-subs      |       LINE_NUMBER=$(grep -n "pve-no-subscript
+      sed -i -e "$(echo $LINE_NUMBER)s/^      |       sed -i -e "$(echo $LINE_NUMBER)s/^deb/#
+      echo -ne "\n\nChanges:\n";                      echo -ne "\n\nChanges:\n";
+      diff $SOURCE_LIST_POINTER_OLD $SOU      |       diff $ENTERPRISE_POINTER_OLD $ENTERPRIS
+      };                                              };
+  };                                              };
+
+$ diff -y -W 100 *-comm
+# Disable Community                           | # Enable Community
+disable_comm() {                              | enable_comm() {
+  [[ $(grep "pve-no-subscription" "$SOUR      |   [[ $(grep "pve-no-subscription" "$SOURCE_LI
+    echo "\"Community Repository\" Is al      |     echo "\"Community Repository\" Is already
+    } || {                                          } || {
+      echo "DISABLING \"Community Reposi      |       echo "ENABLING \"Community Repository\"
+      cp  $SOURCE_LIST_POINTER $SOURCE_LIST_P         cp  $SOURCE_LIST_POINTER $SOURCE_LIST_P
+      LINE_NUMBER=$(grep -n "pve-no-subscript         LINE_NUMBER=$(grep -n "pve-no-subscript
+      sed -i -e "$(echo $LINE_NUMBER)s/^      |       sed -i -e "$(echo $LINE_NUMBER)s/^#deb/
+      echo -ne "\n\nChanges:\n";                      echo -ne "\n\nChanges:\n";
+      diff $SOURCE_LIST_POINTER_OLD $SOURCE_L         diff $SOURCE_LIST_POINTER_OLD $SOURCE_L
+      };                                              };
+  };                                              };
+
+
+$ diff -y -W 100 *-ent
+# Disable Enterprise                          | # Enable Enterprise
+disable_ent() {                               | enable_ent() {
+  [[ $(grep "pve-enterprise" "$ENTERPRIS      |   [[ $(grep "pve-enterprise" "$ENTERPRISE_POI
+    echo "\"pve-enterprise\" Is already       |     echo "\"pve-enterprise\" Is already ENABL
+    } || {                                          } || {
+      echo "DISABLING pve-enterprise.";       |       echo "ENABLING pve-enterprise.";
+      cp  $ENTERPRISE_POINTER $ENTERPRISE_POI         cp  $ENTERPRISE_POINTER $ENTERPRISE_POI
+      LINE_NUMBER=$(grep -n "pve-no-subscript         LINE_NUMBER=$(grep -n "pve-no-subscript
+      sed -i -e "$(echo $LINE_NUMBER)s/^      |       sed -i -e "$(echo $LINE_NUMBER)s/^#deb/
+      echo -ne "\n\nChanges:\n";                      echo -ne "\n\nChanges:\n";
+      diff $ENTERPRISE_POINTER_OLD $ENTERPRIS         diff $ENTERPRISE_POINTER_OLD $ENTERPRIS
+      };                                              };
+  };                                              };
