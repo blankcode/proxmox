@@ -35,3 +35,18 @@ One-Liner; Start and Wander Off; Proxmox Virtual Environment Easy Upgrade Script
         apt update; apt dist-upgrade -y; # Get New Distribution Update
         apt update; apt upgrade -y;      # Get any updates after the distro.
         Determine if a reboot is wanted at this time or not.
+
+Use "Proxmox Update Control" (puc.sh) to remove the errors and perform updates via the UI.
+
+# Proxmox Update Control (puc.sh)
+
+    Options:
+      -h   helps. This Message.
+      --check   What's ENABLE/DISABLED
+      --add     Add the Community Repository in an ENABLED state
+      -c DISABLE Community Repository
+      +c ENABLE Community Repository
+      -e DISABLE Enterprise Repository
+      +e ENABLE Enterprise Repository
+
+    "puc.sh --add -e" # New install, ADDING the Community Repository and DISABLING Enterprise Repository.

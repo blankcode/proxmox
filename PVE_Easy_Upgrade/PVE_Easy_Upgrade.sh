@@ -34,10 +34,10 @@ helps() {
   ";
 };
 
-askto_reboot() { echo "Reboot or Not?"; read REBOOT_NOW; [[ "$REBOOT_NOW" == "Y" ]] && { echo "reboot"; } || [[ "$REBOOT_NOW" != "N" ]] || { echo "Enter \'Y\' or \'N\'"; }; };
+askto_reboot() { echo "Reboot or Not?"; read REBOOT_NOW; [[ "$REBOOT_NOW" == "Y" ]] && { reboot; } || [[ "$REBOOT_NOW" != "N" ]] && { echo "*** Please Reboot in the near future. ***" } || { echo "Enter \'Y\' or \'N\'"; }; };
 
 force_reboot() { reboot; };
 
 should_reboot() { [[ "$REBOOT_NOW" == "Y" ]] && { force_reboot; } || { askto_reboot; }; };
 
-grep -q "deb http://download.proxmox.com/debian/pve buster pve-no-subscription" /etc/apt/sources.list && { echo " deb already added, skipping."; } || { echo "Adding deb."; echo -ne "\n# PVE pve-no-subscription repository provided by proxmox.com,\n# NOT recommended for production use\ndeb http://download.proxmox.com/debian/pve buster pve-no-subscription" >> /etc/apt/sources.list; } && apt update; apt dist-upgrade -y; apt update; apt upgrade -y; should_reboot
+apt update; apt dist-upgrade -y; apt update; apt upgrade -y; should_reboot
