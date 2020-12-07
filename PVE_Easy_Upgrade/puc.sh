@@ -32,20 +32,20 @@ Script Name:
   $0 | Proxmox Update Control
 
 Options:
-  -h   helps. This Message.
-  --check   What's ENABLE/DISABLED
+  -h      helps. This Message.
+  --check What's ENABLE/DISABLED
   --add     Add the Community Repository
-  -e Disable Enterprise Repository
-  -c Disable Community Repository
-  +e Enable Enterprise Repository
-  +c Enable Community Repository
+  -e        Disable Enterprise Repository
+  -c        Disable Community Repository
+  +e        Enable Enterprise Repository
+  +c        Enable Community Repository
 
 Usage:
   $0 --check
-  $0 -e
-  $0 +e
   $0 --add    # New install, just ADDING the Community Repository.
   $0 --add -e # New install, ADDING the Community Repository and DISABLING Enterprise Repository.
+  $0 -e
+  $0 +e
   $0 +c -e  
   $0 +e -c    # If you went from the Community to the Enterprise model by acquiering a license.
 
@@ -144,3 +144,5 @@ check_states() {
   echo "Contents of "$ENTERPRISE_POINTER
   cat $ENTERPRISE_POINTER;
   };
+
+exit 0
