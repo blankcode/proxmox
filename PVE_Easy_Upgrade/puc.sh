@@ -69,7 +69,7 @@ ENTERPRISE_POINTER_OLD=$(echo -ne "/tmp/"$(echo $ENTERPRISE_POINTER | rev | cut 
 # Add the community repository
 add_comm_repo() { 
   [[ $(grep -Po "pve-no-subscription" $SOURCE_LIST_POINTER) == "pve-no-subscription" ]] && { 
-    echo "\"Community Repository\" already added, skipping."; 
+    echo "\"Community Repository\" already added, skipping."; exit 1;
     } || { 
       echo "Adding deb."; 
       cp  $SOURCE_LIST_POINTER $SOURCE_LIST_POINTER_OLD; 
@@ -82,7 +82,7 @@ add_comm_repo() {
 # Disable Community
 disable_comm() { 
   [[ $(grep "pve-no-subscription" "$SOURCE_LIST_POINTER" | grep -Po "^#deb" | cut -c2-4) == "deb" ]] && {
-    echo "\"Community Repository\" Is already DISABLED." 
+    echo "\"Community Repository\" Is already DISABLED."; exit 1;
     } || {
       echo "DISABLING \"Community Repository\" (pve-no-subscription).";
       cp  $SOURCE_LIST_POINTER $SOURCE_LIST_POINTER_OLD; 
@@ -96,7 +96,7 @@ disable_comm() {
 # Enable Community
 enable_comm() { 
   [[ $(grep "pve-no-subscription" "$SOURCE_LIST_POINTER" | grep -Po "^#deb" | cut -c2-4) != "deb" ]] && { 
-    echo "\"Community Repository\" Is already ENABLED."; 
+    echo "\"Community Repository\" Is already ENABLED."; exit 1;
     } || {  
       echo "ENABLING \"Community Repository\" (pve-no-subscription)."; 
       cp  $SOURCE_LIST_POINTER $SOURCE_LIST_POINTER_OLD; 
@@ -113,7 +113,7 @@ disable_ent() {
   [[ $(grep "pve-enterprise" "$ENTERPRISE_POINTER" | grep -Po "^#deb" | cut -c2-4) == "deb" ]] && { 
       echo "\"pve-enterprise\" Is already DISABLED." 
     } || { 
-      echo "DISABLING pve-enterprise.";
+      echo "DISABLING pve-enterprise."; exit 1;
       cp  $ENTERPRISE_POINTER $ENTERPRISE_POINTER_OLD; 
       LINE_NUMBER=$(grep -n "pve-no-subscription" $ENTERPRISE_POINTER | grep deb | cut -d: -f1); 
       sed -i -e "$(echo $LINE_NUMBER)s/^deb/#deb/" $ENTERPRISE_POINTER;
@@ -127,7 +127,7 @@ enable_ent() {
   [[ $(grep "pve-enterprise" "$ENTERPRISE_POINTER" | grep -Po "^#deb" | cut -c2-4) != "deb" ]] && { 
       echo "\"pve-enterprise\" Is already ENABLED." 
     } || { 
-      echo "ENABLING pve-enterprise.";
+      echo "ENABLING pve-enterprise."; exit 1;
       cp  $ENTERPRISE_POINTER $ENTERPRISE_POINTER_OLD; 
       LINE_NUMBER=$(grep -n "pve-no-subscription" $ENTERPRISE_POINTER | grep deb | cut -d: -f1); 
       sed -i -e "$(echo $LINE_NUMBER)s/^#deb/deb/" $ENTERPRISE_POINTER; 
