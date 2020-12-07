@@ -57,12 +57,12 @@ Created By:
 };
 
 # The Whats and Wheres
-SOURCE_LIST_POINTER="/etc/apt/sources.list"
-SOURCE_LIST_POINTER_OLD=$(echo -ne "/tmp/"$(echo $SOURCE_LIST_POINTER | rev | cut -d/ -f1 | rev)".old")
-RELEASE_POINTER="http://download.proxmox.com/debian/pve" # PVE Community Pointer
-CURRENT_RELEASE=$(grep main "$SOURCE_LIST_POINTER" | grep -v update | awk '{print $3}')
-ENTERPRISE_POINTER="/etc/apt/sources.list.d/pve-enterprise.list"
-ENTERPRISE_POINTER_OLD=$(echo -ne "/tmp/"$(echo $ENTERPRISE_POINTER | rev | cut -d/ -f1 | rev)".old")
+SOURCE_LIST_POINTER="/etc/apt/sources.list";
+SOURCE_LIST_POINTER_OLD=$(echo -ne "/tmp/"$(echo $SOURCE_LIST_POINTER | rev | cut -d/ -f1 | rev)".old");
+RELEASE_POINTER="http://download.proxmox.com/debian/pve";
+CURRENT_RELEASE=$(grep main "$SOURCE_LIST_POINTER" | grep -v update | awk '{print $3}');
+ENTERPRISE_POINTER="/etc/apt/sources.list.d/pve-enterprise.list";
+ENTERPRISE_POINTER_OLD=$(echo -ne "/tmp/"$(echo $ENTERPRISE_POINTER | rev | cut -d/ -f1 | rev)".old");
 
 # pve-enterprise\community toggles
 # Community Repo
@@ -111,9 +111,9 @@ enable_comm() {
 # Disable Enterprise
 disable_ent() {
   [[ $(grep "pve-enterprise" "$ENTERPRISE_POINTER" | grep -Po "^#deb" | cut -c2-4) == "deb" ]] && { 
-      echo "\"pve-enterprise\" Is already DISABLED." 
+      echo "\"pve-enterprise\" Is already DISABLED."; exit 1;
     } || { 
-      echo "DISABLING pve-enterprise."; exit 1;
+      echo "DISABLING pve-enterprise."; 
       cp  $ENTERPRISE_POINTER $ENTERPRISE_POINTER_OLD; 
       LINE_NUMBER=$(grep -n "pve-no-subscription" $ENTERPRISE_POINTER | grep deb | cut -d: -f1); 
       sed -i -e "$(echo $LINE_NUMBER)s/^deb/#deb/" $ENTERPRISE_POINTER;
@@ -125,9 +125,9 @@ disable_ent() {
 # Enable Enterprise
 enable_ent() { 
   [[ $(grep "pve-enterprise" "$ENTERPRISE_POINTER" | grep -Po "^#deb" | cut -c2-4) != "deb" ]] && { 
-      echo "\"pve-enterprise\" Is already ENABLED." 
+      echo "\"pve-enterprise\" Is already ENABLED."; exit 1;
     } || { 
-      echo "ENABLING pve-enterprise."; exit 1;
+      echo "ENABLING pve-enterprise."; 
       cp  $ENTERPRISE_POINTER $ENTERPRISE_POINTER_OLD; 
       LINE_NUMBER=$(grep -n "pve-no-subscription" $ENTERPRISE_POINTER | grep deb | cut -d: -f1); 
       sed -i -e "$(echo $LINE_NUMBER)s/^#deb/deb/" $ENTERPRISE_POINTER; 
