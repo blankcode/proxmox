@@ -32,13 +32,13 @@ Script Name:
   $0 | Proxmox Update Control
 
 Options:
-  -h      helps. This Message.
-  --check What's ENABLE/DISABLED
-  --add     Add the Community Repository
-  -e        Disable Enterprise Repository
-  -c        Disable Community Repository
-  +e        Enable Enterprise Repository
-  +c        Enable Community Repository
+  -h       helps. This Message.
+  --check  What's ENABLE/DISABLED
+  --add    Add the Community Repository
+  -e       Disable Enterprise Repository
+  -c       Disable Community Repository
+  +e       Enable Enterprise Repository
+  +c       Enable Community Repository
 
 Usage:
   $0 --check
