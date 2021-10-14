@@ -10,24 +10,49 @@
 # Today I went from 6.2 to 6.3 and a node I missed the last time from 5.0 to 6.3. No sweat.
 
 # GetOPS
-OPTS=$(getopt -o hc --long "de,dc,ee,ec"  -- "$@")
+OPTS=$(getopt -o hc --long "de,dc,ee,ec" -- "$@")
 eval set -- "$OPTS"
 while true; do
   case "$1" in
-    -h) helps; shift;;
-    -e) disable_ent; shift;;
-    -c) disable_comm; shift;;
-    +e) enable_ent; shift;;
-    +c) enable_comm; shift;;
-    --check) check_states; shift;;
-    --add) add_comm_repo; shift;;
-    --) shift; break;;
+  -h)
+    helps
+    shift
+    ;;
+  -e)
+    disable_ent
+    shift
+    ;;
+  -c)
+    disable_comm
+    shift
+    ;;
+  +e)
+    enable_ent
+    shift
+    ;;
+  +c)
+    enable_comm
+    shift
+    ;;
+  --check)
+    check_states
+    shift
+    ;;
+  --add)
+    add_comm_repo
+    shift
+    ;;
+  --)
+    shift
+    break
+    ;;
   esac
 done
 
 # Options Safety Checks for Contradicting Commands
 
-helps() { echo "
+helps() {
+  echo "
 Script Name:
   $0 | Proxmox Update Control
 
@@ -47,102 +72,107 @@ Usage:
   $0 -e
   $0 +e
   $0 +c -e  
-  $0 +e -c    # If you went from the Community to the Enterprise model by acquiering a license.
+  $0 +e -c    # If you went from the Community to the Enterprise model by acquiring a license.
 
 Created By: 
   Name:   Brian Blankenship
   Date:   2020/12/06 (Dec 12, 2020)
   GitHub: https://github.com/blankcode
   "
-};
+}
 
 # The Whats and Wheres
-SOURCE_LIST_POINTER="/etc/apt/sources.list";
-SOURCE_LIST_POINTER_OLD=$(echo -ne "/tmp/"$(echo $SOURCE_LIST_POINTER | rev | cut -d/ -f1 | rev)".old");
-RELEASE_POINTER="http://download.proxmox.com/debian/pve";
-CURRENT_RELEASE=$(grep main "$SOURCE_LIST_POINTER" | grep -v update | awk '{print $3}');
-ENTERPRISE_POINTER="/etc/apt/sources.list.d/pve-enterprise.list";
-ENTERPRISE_POINTER_OLD=$(echo -ne "/tmp/"$(echo $ENTERPRISE_POINTER | rev | cut -d/ -f1 | rev)".old");
+SOURCE_LIST_POINTER="/etc/apt/sources.list"
+SOURCE_LIST_POINTER_OLD=$(echo -ne "/tmp/"$(echo $SOURCE_LIST_POINTER | rev | cut -d/ -f1 | rev)".old")
+RELEASE_POINTER="http://download.proxmox.com/debian/pve"
+CURRENT_RELEASE=$(grep main "$SOURCE_LIST_POINTER" | grep -v update | awk '{print $3}')
+ENTERPRISE_POINTER="/etc/apt/sources.list.d/pve-enterprise.list"
+ENTERPRISE_POINTER_OLD=$(echo -ne "/tmp/"$(echo $ENTERPRISE_POINTER | rev | cut -d/ -f1 | rev)".old")
 
 # pve-enterprise\community toggles
 # Community Repo
 # Add the community repository
-add_comm_repo() { 
-  [[ $(grep -Po "pve-no-subscription" $SOURCE_LIST_POINTER) == "pve-no-subscription" ]] && { 
-    echo "\"Community Repository\" already added, skipping."; exit 1;
-    } || { 
-      echo "Adding deb."; 
-      cp  $SOURCE_LIST_POINTER $SOURCE_LIST_POINTER_OLD; 
-      echo -ne "\n# PVE pve-no-subscription repository provided by proxmox.com,\n# NOT recommended for production use\ndeb http://download.proxmox.com/debian/pve "$CURRENT_RELEASE" pve-no-subscription\n" >> $SOURCE_LIST_POINTER; 
-      echo -ne "\n\nChanges:\n"; 
-      diff $SOURCE_LIST_POINTER_OLD $SOURCE_LIST_POINTER; 
-      }; 
-  }; 
+add_comm_repo() {
+  [[ $(grep -Po "pve-no-subscription" $SOURCE_LIST_POINTER) == "pve-no-subscription" ]] && {
+    echo "\"Community Repository\" already added, skipping."
+    exit 1
+  } || {
+    echo "Adding deb."
+    cp $SOURCE_LIST_POINTER $SOURCE_LIST_POINTER_OLD
+    echo -ne "\n# PVE pve-no-subscription repository provided by proxmox.com,\n# NOT recommended for production use\ndeb http://download.proxmox.com/debian/pve "$CURRENT_RELEASE" pve-no-subscription\n" >>$SOURCE_LIST_POINTER
+    echo -ne "\n\nChanges:\n"
+    diff $SOURCE_LIST_POINTER_OLD $SOURCE_LIST_POINTER
+  }
+}
 
 # Disable Community
-disable_comm() { 
+disable_comm() {
   [[ $(grep "pve-no-subscription" "$SOURCE_LIST_POINTER" | grep -Po "^#deb" | cut -c2-4) == "deb" ]] && {
-    echo "\"Community Repository\" Is already DISABLED."; exit 1;
-    } || {
-      echo "DISABLING \"Community Repository\" (pve-no-subscription).";
-      cp  $SOURCE_LIST_POINTER $SOURCE_LIST_POINTER_OLD; 
-      LINE_NUMBER=$(grep -n "pve-no-subscription" $SOURCE_LIST_POINTER | grep deb | cut -d: -f1); 
-      sed -i -e "$(echo $LINE_NUMBER)s/^deb/#deb/" $SOURCE_LIST_POINTER; 
-      echo -ne "\n\nChanges:\n"; 
-      diff $SOURCE_LIST_POINTER_OLD $SOURCE_LIST_POINTER; 
-      }; 
-  }; 
+    echo "\"Community Repository\" Is already DISABLED."
+    exit 1
+  } || {
+    echo "DISABLING \"Community Repository\" (pve-no-subscription)."
+    cp $SOURCE_LIST_POINTER $SOURCE_LIST_POINTER_OLD
+    LINE_NUMBER=$(grep -n "pve-no-subscription" $SOURCE_LIST_POINTER | grep deb | cut -d: -f1)
+    sed -i -e "$(echo $LINE_NUMBER)s/^deb/#deb/" $SOURCE_LIST_POINTER
+    echo -ne "\n\nChanges:\n"
+    diff $SOURCE_LIST_POINTER_OLD $SOURCE_LIST_POINTER
+  }
+}
 
 # Enable Community
-enable_comm() { 
-  [[ $(grep "pve-no-subscription" "$SOURCE_LIST_POINTER" | grep -Po "^#deb" | cut -c2-4) != "deb" ]] && { 
-    echo "\"Community Repository\" Is already ENABLED."; exit 1;
-    } || {  
-      echo "ENABLING \"Community Repository\" (pve-no-subscription)."; 
-      cp  $SOURCE_LIST_POINTER $SOURCE_LIST_POINTER_OLD; 
-      LINE_NUMBER=$(grep -n "pve-no-subscription" $SOURCE_LIST_POINTER | grep deb | cut -d: -f1); 
-      sed -i -e "$(echo $LINE_NUMBER)s/^#deb/deb/"  $SOURCE_LIST_POINTER; 
-      echo -ne "\n\nChanges:\n"; 
-      diff $SOURCE_LIST_POINTER_OLD $SOURCE_LIST_POINTER; 
-      }; 
-  }; 
+enable_comm() {
+  [[ $(grep "pve-no-subscription" "$SOURCE_LIST_POINTER" | grep -Po "^#deb" | cut -c2-4) != "deb" ]] && {
+    echo "\"Community Repository\" Is already ENABLED."
+    exit 1
+  } || {
+    echo "ENABLING \"Community Repository\" (pve-no-subscription)."
+    cp $SOURCE_LIST_POINTER $SOURCE_LIST_POINTER_OLD
+    LINE_NUMBER=$(grep -n "pve-no-subscription" $SOURCE_LIST_POINTER | grep deb | cut -d: -f1)
+    sed -i -e "$(echo $LINE_NUMBER)s/^#deb/deb/" $SOURCE_LIST_POINTER
+    echo -ne "\n\nChanges:\n"
+    diff $SOURCE_LIST_POINTER_OLD $SOURCE_LIST_POINTER
+  }
+}
 
 # Enterprise Repo
 # Disable Enterprise
 disable_ent() {
-  [[ $(grep "pve-enterprise" "$ENTERPRISE_POINTER" | grep -Po "^#deb" | cut -c2-4) == "deb" ]] && { 
-      echo "\"pve-enterprise\" Is already DISABLED."; exit 1;
-    } || { 
-      echo "DISABLING pve-enterprise."; 
-      cp  $ENTERPRISE_POINTER $ENTERPRISE_POINTER_OLD; 
-      LINE_NUMBER=$(grep -n "pve-no-subscription" $ENTERPRISE_POINTER | grep deb | cut -d: -f1); 
-      sed -i -e "$(echo $LINE_NUMBER)s/^deb/#deb/" $ENTERPRISE_POINTER;
-      echo -ne "\n\nChanges:\n";
-      diff $ENTERPRISE_POINTER_OLD $ENTERPRISE_POINTER; 
-      }; 
-  }; 
+  [[ $(grep "pve-enterprise" "$ENTERPRISE_POINTER" | grep -Po "^#deb" | cut -c2-4) == "deb" ]] && {
+    echo "\"pve-enterprise\" Is already DISABLED."
+    exit 1
+  } || {
+    echo "DISABLING pve-enterprise."
+    cp $ENTERPRISE_POINTER $ENTERPRISE_POINTER_OLD
+    LINE_NUMBER=$(grep -n "pve-no-subscription" $ENTERPRISE_POINTER | grep deb | cut -d: -f1)
+    sed -i -e "$(echo $LINE_NUMBER)s/^deb/#deb/" $ENTERPRISE_POINTER
+    echo -ne "\n\nChanges:\n"
+    diff $ENTERPRISE_POINTER_OLD $ENTERPRISE_POINTER
+  }
+}
 
 # Enable Enterprise
-enable_ent() { 
-  [[ $(grep "pve-enterprise" "$ENTERPRISE_POINTER" | grep -Po "^#deb" | cut -c2-4) != "deb" ]] && { 
-      echo "\"pve-enterprise\" Is already ENABLED."; exit 1;
-    } || { 
-      echo "ENABLING pve-enterprise."; 
-      cp  $ENTERPRISE_POINTER $ENTERPRISE_POINTER_OLD; 
-      LINE_NUMBER=$(grep -n "pve-no-subscription" $ENTERPRISE_POINTER | grep deb | cut -d: -f1); 
-      sed -i -e "$(echo $LINE_NUMBER)s/^#deb/deb/" $ENTERPRISE_POINTER; 
-      echo -ne "\n\nChanges:\n"; 
-      diff $ENTERPRISE_POINTER_OLD $ENTERPRISE_POINTER; 
-      }; 
-  }; 
+enable_ent() {
+  [[ $(grep "pve-enterprise" "$ENTERPRISE_POINTER" | grep -Po "^#deb" | cut -c2-4) != "deb" ]] && {
+    echo "\"pve-enterprise\" Is already ENABLED."
+    exit 1
+  } || {
+    echo "ENABLING pve-enterprise."
+    cp $ENTERPRISE_POINTER $ENTERPRISE_POINTER_OLD
+    LINE_NUMBER=$(grep -n "pve-no-subscription" $ENTERPRISE_POINTER | grep deb | cut -d: -f1)
+    sed -i -e "$(echo $LINE_NUMBER)s/^#deb/deb/" $ENTERPRISE_POINTER
+    echo -ne "\n\nChanges:\n"
+    diff $ENTERPRISE_POINTER_OLD $ENTERPRISE_POINTER
+  }
+}
 
 # What's ENABLE/DISABLED
 check_states() {
-  echo "Contents of "$SOURCE_LIST_POINTER;
-  cat $SOURCE_LIST_POINTER;
-  echo;
+  echo "Contents of "$SOURCE_LIST_POINTER
+  cat $SOURCE_LIST_POINTER
+  echo
   echo "Contents of "$ENTERPRISE_POINTER
-  cat $ENTERPRISE_POINTER;
-  };
+  cat $ENTERPRISE_POINTER
+}
 
 exit 0
